@@ -28,6 +28,10 @@ module.exports = (sequelize, DataTypes) => {
     company: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    passwordHash: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     tableName: 'vendors',
