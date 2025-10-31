@@ -302,4 +302,23 @@ exports.getUserDashboardStats = async (req, res) => {
   }
 };
 
+exports.deleteJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Job ID required' });
+    }
+    const job = await Job.findByPk(id);
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+    // Delete related JobApplications explicitly (for clarity, associations have CASCADE but some DBs require manual cleanup)
+    await JobApplication.destroy({ where: { jobId: id } });
+    await job.destroy();
+    return res.status(204).send();
+  } catch (err) {
+    return res.status(500).json({ message: 'Failed to delete job', error: err.message });
+  }
+};
+
 

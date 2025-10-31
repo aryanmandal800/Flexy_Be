@@ -20,6 +20,8 @@ router.get('/myActiveJobs', auth, jobController.getUserActiveJobs);
 
 router.get('/myDashboard', auth, jobController.getUserDashboardStats);
 
+router.delete('/:id', adminAuth, jobController.deleteJob);
+
 module.exports = router;
 
 

@@ -7,7 +7,7 @@ require('dotenv').config();
 const { sequelize } = require('./models');
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const jobRoutes = require('./routes/jobRoutes');
+const vendorRoutes = require('./routes/vendorRoutes');
 const userProfileRoutes = require('./routes/userProfileRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
 app.use('/api/auth', authRoutes);
@@ -24,6 +25,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/profile', userProfileRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/vendor', vendorRoutes);
 
 async function startServer() {
   try {

@@ -2,7 +2,7 @@
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { Admin, JobApplication, Job, User, UserProfile } = require('../models');
+const { Admin, JobApplication, Job, User, UserProfile, Vendor } = require('../models');
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -86,6 +86,24 @@ exports.getAdminProfile = async (req, res) => {
   } catch (err) {
     console.error('Get admin profile error:', err);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.updateAdminProfile = async (req, res) => {
+  try {
+    const adminId = req.userId;
+    const { name, email, phone } = req.body;
+    const admin = await Admin.findByPk(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    if (email) admin.email = email;
+    if (name) admin.name = name;
+    if (phone) admin.phone = phone;
+    await admin.save();
+    return res.json(sanitizeAdmin(admin));
+  } catch (err) {
+    return res.status(400).json({ message: "Failed to update admin profile", error: err.message });
   }
 };
 
@@ -283,6 +301,54 @@ exports.getApplicationStats = async (req, res) => {
     });
   } catch (err) {
     console.error('Get application stats error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.getDashboardCounts = async (req, res) => {
+  try {
+    const [users, vendors, jobs] = await Promise.all([
+      User.count(),
+      Vendor.count(),
+      Job.count()
+    ]);
+    return res.json({ users, vendors, jobs });
+  } catch (err) {
+    console.error('Get dashboard counts error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await require('../models').User.findAll({
+      attributes: ['id', 'name', 'email', 'phone', 'createdAt', 'updatedAt']
+    });
+    res.json(users);
+  } catch (err) {
+    console.error('Get all users error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// DELETE user by ID (admin only)
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'User ID required' });
+    }
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Delete user profile (if exists)
+    await UserProfile.destroy({ where: { userId: id } });
+    // Delete user
+    await user.destroy();
+    return res.status(204).send();
+  } catch (err) {
+    console.error('Delete user error:', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
