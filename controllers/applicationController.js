@@ -52,7 +52,7 @@ exports.updateApplicationStatus = async (req, res) => {
 
     const updateData = { status, notes };
     
-    // Set completedAt when status is changed to completed
+    
     if (status === 'completed') {
       updateData.completedAt = new Date();
     }

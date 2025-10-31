@@ -13,5 +13,6 @@ router.get('/applications', adminAuth, adminController.getAllApplications);
 router.patch('/applications/:applicationId/status', adminAuth, adminController.updateApplicationStatus);
 router.patch('/applications/:applicationId/schedule', adminAuth, adminController.scheduleApplication);
 router.get('/applications/stats', adminAuth, adminController.getApplicationStats);
+router.get('/getAllUsers', adminAuth, adminController.getAllUsers);
 
 module.exports = router;

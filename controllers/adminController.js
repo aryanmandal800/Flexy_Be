@@ -89,6 +89,34 @@ exports.getAdminProfile = async (req, res) => {
   }
 };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const { count, rows: users } = await User.findAndCountAll({
+      attributes: ['id', 'name', 'email', 'phone', 'createdAt', 'updatedAt'],
+      order: [['createdAt', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    return res.json({
+      users,
+      totalUsers: count,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+  } catch (err) {
+    console.error('Get all users error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 exports.getAllApplications = async (req, res) => {
   try {
     const { status, jobId, page = 1, limit = 10 } = req.query;
@@ -221,7 +249,7 @@ exports.scheduleApplication = async (req, res) => {
       notes
     });
 
-    // Return updated application with relations
+ 
     const updatedApplication = await JobApplication.findByPk(applicationId, {
       include: [
         {
