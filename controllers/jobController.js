@@ -46,7 +46,7 @@ exports.createJob = async (req, res) => {
 
 exports.getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.findAll({ order: [['createdAt', 'DESC']] });
+    const jobs = await Job.findAll({ order: [['id', 'ASC']] });
     return res.status(200).json(jobs);
   } catch (err) {
     return res.status(500).json({ message: 'Failed to fetch jobs', error: err.message });

@@ -350,7 +350,8 @@ exports.getDashboardCounts = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await require('../models').User.findAll({
-      attributes: ['id', 'name', 'email', 'phone', 'createdAt', 'updatedAt']
+      attributes: ['id', 'name', 'email', 'phone', 'createdAt', 'updatedAt'],
+      order: [['id', 'ASC']]
     });
     res.json(users);
   } catch (err) {

@@ -1,6 +1,7 @@
 'use strict';
 
 const { Vendor } = require('../models');
+const bcrypt = require('bcrypt');
 
 exports.listVendors = async (req, res) => {
   try {
@@ -14,9 +15,9 @@ exports.listVendors = async (req, res) => {
 
 exports.createVendor = async (req, res) => {
   try {
-    const { name, email, contact, address, company,password } = req.body;
+    const { name, email, contact, address, company, password } = req.body;
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'name and email are required' });
+      return res.status(400).json({ message: 'name, email and password are required' });
     }
     const vendor = await Vendor.create({ name, email, contact, address, company,password });
     return res.status(201).json(vendor);
