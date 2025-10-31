@@ -80,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: []
     },
     dressCode: {
-     
+    
       type: DataTypes.JSONB,
       allowNull: false,
       defaultValue: [],
@@ -96,6 +96,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       field: 'company_name'
+    },
+    vendorId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'vendor_id'
     }
   }, {
     tableName: 'jobs',

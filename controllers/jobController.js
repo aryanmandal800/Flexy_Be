@@ -35,7 +35,8 @@ exports.createJob = async (req, res) => {
       requiredSkills,
       skills,
       dressCode,
-      googleMapUrl
+      googleMapUrl,
+      vendorId: req.userId || null
     });
 
     return res.status(201).json(job);
@@ -50,6 +51,16 @@ exports.getAllJobs = async (req, res) => {
     return res.status(200).json(jobs);
   } catch (err) {
     return res.status(500).json({ message: 'Failed to fetch jobs', error: err.message });
+  }
+};
+
+exports.getVendorJobs = async (req, res) => {
+  try {
+    const vendorId = req.userId;
+    const jobs = await Job.findAll({ where: { vendorId }, order: [['createdAt', 'DESC']] });
+    return res.status(200).json(jobs);
+  } catch (err) {
+    return res.status(500).json({ message: 'Failed to fetch vendor jobs', error: err.message });
   }
 };
 
