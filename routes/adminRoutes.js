@@ -19,5 +19,6 @@ router.delete('/users/:id', adminAuth, adminController.deleteUser);
 
 // Dashboard counts (users, vendors, jobs)
 router.get('/dashboard/counts', adminAuth, adminController.getDashboardCounts);
+router.get('/getAllUsers', adminAuth, adminController.getAllUsers);
 
 module.exports = router;
