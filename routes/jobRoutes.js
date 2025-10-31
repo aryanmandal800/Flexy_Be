@@ -21,6 +21,8 @@ router.get('/myActiveJobs', auth, jobController.getUserActiveJobs);
 
 router.get('/myDashboard', auth, jobController.getUserDashboardStats);
 
+router.get('/:id/hourlyCost', jobController.getJobHourlyCost);
+
 router.delete('/:id', adminAuth, jobController.deleteJob);
 
 module.exports = router;

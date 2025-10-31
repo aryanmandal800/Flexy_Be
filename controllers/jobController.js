@@ -333,3 +333,27 @@ exports.deleteJob = async (req, res) => {
 };
 
 
+exports.getJobHourlyCost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Job ID required' });
+    }
+
+    const job = await Job.findByPk(id, { attributes: ['id', 'title', 'companyName', 'pricePerHour'] });
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    return res.status(200).json({
+      jobId: job.id,
+      jobTitle: job.title,
+      companyName: job.companyName,
+      pricePerHour: job.pricePerHour,
+      currency: 'USD'
+    });
+  } catch (err) {
+    return res.status(500).json({ message: 'Failed to fetch hourly cost', error: err.message });
+  }
+};
+

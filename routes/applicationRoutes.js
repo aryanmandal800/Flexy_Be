@@ -17,6 +17,10 @@ router.patch('/:applicationId/status', auth, applicationController.updateApplica
 
 router.patch('/:applicationId/schedule', auth, applicationController.scheduleApplication);
 
+router.patch('/:applicationId/complete', auth, applicationController.completeApplication);
+
+router.get('/:applicationId/cost', auth, applicationController.getCompletedApplicationCost);
+
 module.exports = router;
 
 

@@ -3,7 +3,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Vendor } = require('../models');
-const bcrypt = require('bcrypt');
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'change_me_in_env';
@@ -14,10 +13,16 @@ function sanitizeVendor(vendorInstance) {
   return { id, name, email, contact, address, company, createdAt, updatedAt };
 }
 
+function sanitizeVendorPublic(vendorInstance) {
+  const { id, name, email, contact, address, company, createdAt, updatedAt } = vendorInstance;
+  return { id, name, email, contact, address, company, createdAt, updatedAt };
+}
+
 exports.listVendors = async (req, res) => {
   try {
     const vendors = await Vendor.findAll({ order: [['id', 'ASC']] });
-    return res.json(vendors);
+    const sanitized = vendors.map(v => sanitizeVendorPublic(v));
+    return res.json(sanitized);
   } catch (err) {
     console.error('Error listing vendors', err);
     return res.status(500).json({ message: 'Failed to fetch vendors' });
@@ -25,14 +30,16 @@ exports.listVendors = async (req, res) => {
 };
 
 exports.createVendor = async (req, res) => {
+
   try {
     const { name, email, contact, address, company, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'name, email and password are required' });
     }
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const vendor = await Vendor.create({ name, email, contact, address, company, passwordHash });
-    return res.status(201).json(vendor);
+    const vendor = await Vendor.create({ name, email, contact, address, company, password: passwordHash });
+    // Return public fields only so UI does not immediately show email
+    return res.status(201).json(sanitizeVendorPublic(vendor));
   } catch (err) {
     console.error('Error creating vendor', err);
     if (err.name === 'SequelizeUniqueConstraintError') {
@@ -64,11 +71,11 @@ exports.vendorLogin = async (req, res) => {
     }
 
     const vendor = await Vendor.findOne({ where: { email } });
-    if (!vendor || !vendor.passwordHash) {
+    if (!vendor || !vendor.password) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, vendor.passwordHash);
+    const isMatch = await bcrypt.compare(password, vendor.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }

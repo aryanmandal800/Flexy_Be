@@ -167,3 +167,76 @@ exports.getAllApplications = async (req, res) => {
 };
 
 
+exports.completeApplication = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+
+    const application = await JobApplication.findByPk(applicationId);
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    await application.update({ status: 'completed', completedAt: new Date() });
+
+    return res.status(200).json(application);
+  } catch (err) {
+    return res.status(400).json({ message: 'Failed to complete application', error: err.message });
+  }
+};
+
+exports.getCompletedApplicationCost = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+
+    const application = await JobApplication.findByPk(applicationId, {
+      include: [
+        {
+          model: Job,
+          as: 'job',
+          attributes: ['id', 'title', 'companyName', 'pricePerHour', 'shiftTime']
+        }
+      ]
+    });
+
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    if (application.status !== 'completed') {
+      return res.status(400).json({ message: 'Application is not completed' });
+    }
+
+    const pricePerHour = parseFloat(application.job.pricePerHour) || 0;
+    const shiftTime = application.job.shiftTime || '';
+
+    let hours = 8;
+    const timeRangeMatch = shiftTime.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
+    if (timeRangeMatch) {
+      const [, startHour, startMin, endHour, endMin] = timeRangeMatch;
+      const startTime = parseInt(startHour) + (parseInt(startMin) / 60);
+      const endTime = parseInt(endHour) + (parseInt(endMin) / 60);
+      hours = endTime - startTime;
+    } else {
+      const hoursMatch = shiftTime.match(/(\d+(?:\.\d+)?)\s*(?:hours?|h)/i);
+      if (hoursMatch) {
+        hours = parseFloat(hoursMatch[1]);
+      }
+    }
+
+    const cost = Math.round(pricePerHour * hours * 100) / 100;
+
+    return res.status(200).json({
+      applicationId: application.id,
+      jobId: application.job.id,
+      pricePerHour: Math.round(pricePerHour * 100) / 100,
+      hours: Math.round(hours * 100) / 100,
+      cost,
+      currency: 'USD',
+      completedAt: application.completedAt
+    });
+  } catch (err) {
+    return res.status(400).json({ message: 'Failed to fetch completed application cost', error: err.message });
+  }
+};
+
+
